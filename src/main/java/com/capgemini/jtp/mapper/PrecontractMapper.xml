@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.PrecontractMapper">
+    <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.Precontract">
+        <id column="preContractId" jdbcType="INTEGER" property="preContractId"/>
+        <result column="scheduleId" jdbcType="INTEGER" property="scheduleId" />
+        <result column="userId" jdbcType="VARCHAR" property="userId" />
+    </resultMap>
+
+    <sql id="userAnddepart">
+CREATE TEMPORARY  TABLE temp_table
+
+　　ENGINE = MEMORY
+
+　　SELECT * FROM `bm_sc_settlement`
+
+        create temporary table table1
+        select a.userId,a.userName,b.departId,b.departName
+        from userinfo a,departinfo b
+        Where a.departId = b.departId
+
+    </sql>
+
+    <select id="listPrecontract" resultMap="BaseResultMap">
+       select * from pre_contract where preContractId != 0
+   </select>
+
+    <select id="listPrecByScheduleId" resultMap="BaseResultMap">
+       select * from pre_contract where scheduleId = #{scheduleId}
+   </select>
+
+    <insert id="insertPrecontract">
+        insert into pre_contract (`scheduleId`,userId)
+        values
+            (
+            #{Precontract.scheduleId,jdbcType=INTEGER},#{Precontract.userId,jdbcType=VARCHAR}
+            )
+
+    </insert>
+
+    <delete id="deletePrecontractById" parameterType="int">
+        DELETE FROM pre_contract WHERE preContractId=#{preContractId}
+    </delete>
+
+    <update id="updatePrecontractById" parameterType="com.capgemini.jtp.entity.Precontract">
+        update pre_contract
+        <set>
+            `scheduleId` = #{Precontract.scheduleId,jdbcType=INTEGER},
+            `userId` = #{Precontract.userId,jdbcType=VARCHAR},
+
+        </set>
+        where preContractId = #{Precontract.preContractId,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteaPrecByScheduleId" parameterType="int">
+        DELETE FROM pre_contract WHERE scheduleId=#{scheduleId}
+    </delete>
+
+    <select id="selectPrecByScheduleId" resultType="Integer">
+       select preContractId from pre_contract where scheduleId = #{scheduleId}
+   </select>
+
+    <select id="precontractUserByScheduleId" resultType="com.capgemini.jtp.vo.response.PrecontractRespVo">
+        select * from
+        (select a.userId as userId,a.userName as userName,b.departId as departId,b.departName as departName
+        from `user` a,depart b
+        where a.departId = b.departId order by userId) as table1
+        where userId in (select userId from pre_contract where scheduleId =#{scheduleId})
+
+    </select>
+<!--    select * from-->
+<!--    (select a.userId,a.userName,b.departId,b.departName-->
+<!--    from userinfo a,departinfo b-->
+<!--    where a.departId = b.departId order by a.userId)-->
+<!--    where userId in (select userId from precontract where scheduleId =#{scheduleId})-->
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

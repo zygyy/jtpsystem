@@ -1,0 +1,2 @@
+webpackJsonp([12],{"622Z":function(e,n,r){var i={"./DeleteMail.vue":"B2L3","./DraftMail.vue":"VY7+","./MailboxIndex.vue":"Pn1r","./ReceiveMail.vue":"1haG","./SendMail.vue":"Rqyo"};function o(e){return r(t(e))}function t(e){var n=i[e];if(!(n+1))throw new Error("Cannot find module '"+e+"'.");return n}o.keys=function(){return Object.keys(i)},o.resolve=t,e.exports=o,o.id="622Z"}});
+//# sourceMappingURL=12.2a6653c57c5a8c42a6e2.js.map

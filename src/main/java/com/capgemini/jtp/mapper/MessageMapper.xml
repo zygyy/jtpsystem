@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.MessageMapper">
+    
+    <!--搜索字段 -->
+    <sql id="search">
+        <if test="messageSearchVo.messageTypeId != null and messageSearchVo.messageTypeId != 0">
+            AND `type` = #{messageSearchVo.messageTypeId}
+        </if>
+        <if test="messageSearchVo.query != null">
+            AND title LIKE concat(concat('%', #{messageSearchVo.query}), '%')
+        </if>
+        <if test="messageSearchVo.startTime != null and messageSearchVo.endTime != null">
+            AND `createTime` BETWEEN #{messageSearchVo.startTime} AND #{messageSearchVo.endTime}
+        </if>
+    </sql>
+    
+    <!-- 获取信息列表 -->
+    <select id="listMessages"
+            resultType="com.capgemini.jtp.entity.Message"
+            parameterType="com.capgemini.jtp.vo.request.MessageEditVo">
+        SELECT *
+        FROM message
+        <where><include refid="search"/></where>
+        LIMIT #{messageSearchVo.start}, #{messageSearchVo.size}
+    </select>
+    
+    <!-- 统计信息列表长度 -->
+    <select id="countMessages"
+            resultType="Integer"
+            parameterType="com.capgemini.jtp.vo.request.MessageEditVo">
+        SELECT count(1)
+        FROM message
+        <where><include refid="search"/></where>
+    </select>
+    
+    <!-- 获取一条信息 -->
+    <select id="getMessage" parameterType="Integer"
+            resultType="com.capgemini.jtp.entity.Message">
+        SELECT * FROM message WHERE messageId = #{messageId}
+    </select>
+    
+    <!-- 新建一条信息 -->
+    <insert id="insertMessage" parameterType="com.capgemini.jtp.vo.request.MessageEditVo">
+        INSERT INTO message
+            (
+             messageId,
+             type,
+             title,
+             content,
+             beginTime,
+             endTime,
+             fromUserId,
+             createTime
+            )
+        VALUES
+            (
+            #{messageEditVo.messageId},
+            #{messageEditVo.messageTypeId},
+            #{messageEditVo.messageTitle},
+            #{messageEditVo.messageContent},
+            #{messageEditVo.beginTime},
+            #{messageEditVo.endTime},
+            #{messageEditVo.createUserId},
+            #{messageEditVo.createTime}
+            )
+    </insert>
+    
+    <!-- 更新一条信息 -->
+    <update id="updateMessage" parameterType="com.capgemini.jtp.vo.request.MessageEditVo">
+        UPDATE message
+        SET type = #{messageEditVo.messageTypeId},
+            title = #{messageEditVo.messageTitle},
+            content = #{messageEditVo.messageContent},
+            beginTime = #{messageEditVo.beginTime},
+            endTime = #{messageEditVo.endTime}
+        WHERE messageId = #{messageEditVo.messageId}
+    </update>
+    
+    <!-- 发布一条信息 -->
+    <update id="publishMessage" parameterType="Integer">
+        UPDATE message
+        SET ifPublish = '1', recordTime = now()
+        WHERE messageId = #{messageId}
+    </update>
+    
+    <!-- 删除信息 -->
+    <delete id="deleteMessages" parameterType="java.util.List">
+        DELETE FROM message WHERE messageId IN
+            <foreach collection="messageIds" item="messageId" separator="," open="(" close=")">
+                #{messageId}
+            </foreach>
+    </delete>
+</mapper>

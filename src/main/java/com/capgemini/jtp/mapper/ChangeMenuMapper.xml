@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.ChangeMenuMapper">
+    <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.Menu">
+        <id column="nodeId" property="nodeId" jdbcType="INTEGER"/>
+        <result column="nodeURL" property="nodeURL" jdbcType="VARCHAR"/>
+        <result column="displayName" property="displayName" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="component" property="component" javaType="java.lang.Object"/>
+        <result column="displayOrder" property="displayOrder" jdbcType="INTEGER"/>
+        <result column="parentNodeId" property="parentNodeId" jdbcType="INTEGER"/>
+        <collection property="roles" ofType="com.capgemini.jtp.entity.Role">
+            <id column="roleId" property="roleId"/>
+            <result column="roleName" property="roleName"/>
+            <result column="roleDesc" property="roleDesc"/>
+        </collection>
+        <collection property="children" ofType="com.capgemini.jtp.entity.Menu">
+            <id column="nodeId2" property="nodeId" jdbcType="INTEGER"/>
+            <result column="nodeURL2" property="nodeURL" jdbcType="VARCHAR"/>
+            <result column="displayName2" property="displayName" jdbcType="VARCHAR"/>
+            <result column="path2" property="path" jdbcType="VARCHAR"/>
+            <result column="component2" property="component" javaType="java.lang.Object"/>
+            <result column="displayOrder2" property="displayOrder" jdbcType="INTEGER"/>
+            <result column="parentNodeId2" property="parentNodeId" jdbcType="INTEGER"/>
+            <collection property="children" ofType="com.capgemini.jtp.entity.Menu">
+                <id column="id3" property="nodeId"/>
+                <result column="displayName3" property="displayName" jdbcType="VARCHAR"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+<!--    获取所有的menu，但是此方法需要保证数据库正确，即导出所有的menu（不管正确与否）desc由大到小排序-->
+    <select id="getAllMenu" resultMap="BaseResultMap">
+        select * from sys_fun order by nodeId desc
+    </select>
+    <select id="getMenusByUserId" parameterType="int" resultMap="BaseResultMap">
+        select m1.* ,m2.`nodeId` as nodeId2,m2.`component` as component2,m2.`displayName` as displayName2,m2.`path` as path2 ,m2.`displayOrder` as displayOrder2 from sys_fun m1,sys_fun m2 where m1.`nodeId` = m2.`parentNodeId` and m1.`nodeId` != 1 and m2.`nodeId` in (select mr.`nodeId` from role_right mr,user h_r where h_r.`roleId` = mr.`roleId` and h_r.`userId`=#{userId}) order by m1.`displayOrder`,m2.`displayOrder`;
+    </select>
+<!--    <select id="menuTree" resultMap="BaseResultMap">-->
+<!--            select m1.`id`,m1.`name`,m2.`id` as id2,m2.`name` as name2,m3.`id` as id3,m3.`name` as name3 from menu m1,menu m2,menu m3 where m1.`id`=m2.`parentId` and m2.`id`=m3.`parentId` and m3.`enabled`=true-->
+<!--        </select>-->
+<!--    <select id="getMenusByRid" resultType="Long">-->
+<!--        SELECT mid from menu_role WHERE rid=#{rid}-->
+<!--    </select>-->
+    <select id="getDisplayOrderListBynodeId" parameterType="int" resultType="integer">
+        select sf1.`displayOrder` from sys_fun sf1,sys_fun sf2 where sf2.`nodeId` = #{nodeId} and sf1.`parentNodeId` = sf2.`parentNodeId` order by sf1.`displayOrder`
+    </select>
+
+    <update id="setOneDisplayOrder" parameterType="com.capgemini.jtp.entity.Menu">
+        update sys_fun set displayOrder = #{menu.displayOrder,jdbcType=INTEGER} where nodeId = #{menu.nodeId,jdbcType=INTEGER}
+    </update>
+
+    <select id="selectMenuByParentNodeIdAndDisplayOrder" resultType="com.capgemini.jtp.entity.Menu">
+        select * from sys_fun where displayOrder = #{menu.displayOrder,jdbcType=INTEGER} and parentNodeId = #{menu.parentNodeId,jdbcType=INTEGER} and nodeId != #{menu.nodeId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getDisplayOrderBynodeId" parameterType="int" resultType="integer">
+        select displayOrder from sys_fun where  nodeId = #{nodeId}
+    </select>
+
+    <select id="getParentIdByNodeId" parameterType="int" resultType="integer">
+        select parentNodeId from sys_fun where  nodeId = #{nodeId}
+    </select>
+</mapper>

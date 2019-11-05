@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.MeetingInfoMapper">
+    <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.MeetingInfo">
+        <id column="meetingId" jdbcType="INTEGER" property="meetingId"/>
+        <result column="meetingName" jdbcType="VARCHAR" property="meetingName" />
+    </resultMap>
+
+
+
+
+    <select id="listMeeting" resultMap="BaseResultMap">
+       select * from meeting where meetingId != 0
+   </select>
+
+    <select id="selectMeetingById" resultMap="BaseResultMap">
+       select * from meeting where meetingId = #{meetingId}
+   </select>
+
+
+
+    <insert id="insertMeeting">
+        insert into meeting (`meetingName`)
+        values
+
+            (
+            #{MeetingInfo.meetingName,jdbcType=VARCHAR}
+            )
+
+    </insert>
+
+    <delete id="deleteMeetingById" parameterType="int">
+        DELETE FROM meeting WHERE meetingId=#{meetingId}
+    </delete>
+
+    <update id="updateMeetingById" parameterType="com.capgemini.jtp.entity.MeetingInfo">
+        update meeting
+        <set>
+            `meetingName` = #{MeetingInfo.meetingName,jdbcType=VARCHAR}
+        </set>
+        where meetingId = #{MeetingInfo.meetingId,jdbcType=INTEGER}
+    </update>
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

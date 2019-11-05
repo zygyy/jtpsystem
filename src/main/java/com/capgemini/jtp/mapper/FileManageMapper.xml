@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.FileManageMapper">
+     <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.MyNote">
+       <id column="noteId" jdbcType="INTEGER" property="noteId"/>
+       <result column="noteTitle" jdbcType="VARCHAR" property="noteTitle" />
+       <result column="noteContent" jdbcType="VARCHAR" property="noteContent" />
+       <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+       <result column="createUser" jdbcType="VARCHAR" property="createUser" />
+   </resultMap>
+
+ <select id="getChildren" resultType="com.capgemini.jtp.vo.response.FileTestRespVo">
+       select fileId,label,fileType,remark from file where parentId = #{parent}
+   </select>
+    <select id="getParent" resultType="com.capgemini.jtp.vo.response.FileTestRespVo">
+       select fileId,label,fileType,remark from file where fileId = #{children}
+   </select>
+
+    <select id="getRootName" resultType="com.capgemini.jtp.vo.response.FileTestRespVo">
+       select fileId,label,fileType,remark from file where parentId=0
+   </select>
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

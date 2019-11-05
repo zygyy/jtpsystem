@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.ScheduleMapper">
+    <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.Schedule">
+        <id column="scheduleId" jdbcType="INTEGER" property="scheduleId"/>
+        <result column="title" jdbcType="VARCHAR" property="title" />
+        <result column="address" jdbcType="VARCHAR" property="address" />
+        <result column="meetingId" jdbcType="INTEGER" property="meetingId" />
+        <result column="beginTime" jdbcType="TIMESTAMP" property="beginTime" />
+        <result column="endTime" jdbcType="TIMESTAMP" property="endTime" />
+        <result column="schContent" jdbcType="VARCHAR" property="schContent" />
+        <result column="createUser" jdbcType="VARCHAR" property="createUser" />
+        <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="ifPrivate" jdbcType="VARCHAR" property="ifPrivate" />
+    </resultMap>
+    <resultMap id="DepartResultMap" type="com.capgemini.jtp.vo.response.DepartGetRespVo">
+
+        <result column="createUser" property="createUser"/>
+
+        <result column="group_concat(scheduleId)"  property="scheduleId" />
+
+    </resultMap>
+    <select id="listSchedule" resultMap="BaseResultMap">
+       select * from schedule where scheduleId != 0
+   </select>
+    <select id="listByScheduleId" resultMap="BaseResultMap">
+       select * from schedule where scheduleId = #{scheduleId}
+   </select>
+    <select id="listScheduleByName" resultMap="BaseResultMap">
+       select * from schedule where createUser = #{userName}
+   </select>
+
+    <insert id="insertSchedule">
+        insert into schedule (`title`, `address`,`meetingId`,`beginTime`,`endTime`,`schContent`,`createUser`,`createTime`,`ifPrivate`)
+        values
+
+            (
+            #{Schedule.title,jdbcType=VARCHAR}, #{Schedule.address,jdbcType=VARCHAR}, #{Schedule.meetingId,jdbcType=INTEGER}, #{Schedule.beginTime,jdbcType=TIMESTAMP},
+            #{Schedule.endTime,jdbcType=TIMESTAMP}, #{Schedule.schContent,jdbcType=VARCHAR}, #{Schedule.createUser,jdbcType=VARCHAR}, #{Schedule.createTime,jdbcType=TIMESTAMP},
+            #{Schedule.ifPrivate,jdbcType=VARCHAR}
+            )
+
+    </insert>
+
+    <delete id="deleteScheduleById" parameterType="int">
+        DELETE FROM schedule WHERE scheduleId=#{scheduleId}
+    </delete>
+
+    <update id="updateScheduleById" parameterType="com.capgemini.jtp.entity.Schedule">
+        update schedule
+        <set>
+            <if test="Schedule.title != null and Schedule.title != '' ">`title`=#{Schedule.title,jdbcType=VARCHAR},</if>
+            <if test="Schedule.address != null and Schedule.address != '' ">`address`=#{Schedule.address,jdbcType=VARCHAR},</if>
+            <if test="Schedule.meetingId != null  ">`meetingId`=#{Schedule.meetingId,jdbcType=INTEGER},</if>
+            <if test="Schedule.beginTime != null  ">`beginTime`=#{Schedule.beginTime,jdbcType=TIMESTAMP},</if>
+            <if test="Schedule.endTime != null  ">`endTime`=#{Schedule.endTime,jdbcType=TIMESTAMP},</if>
+            <if test="Schedule.schContent != null and Schedule.schContent != '' ">`schContent`=#{Schedule.schContent,jdbcType=VARCHAR},</if>
+
+            <if test="Schedule.ifPrivate != null and Schedule.ifPrivate != '' ">`ifPrivate`=#{Schedule.ifPrivate,jdbcType=VARCHAR}</if>
+
+        </set>
+        where scheduleId = #{Schedule.scheduleId,jdbcType=INTEGER}
+    </update>
+
+    <select id="getScheduleByName" resultMap="DepartResultMap">
+
+       select DISTINCT createUser,group_concat(scheduleId)
+       from schedule
+
+        where
+        ifPrivate = 0
+        <if test="departSchedule.departId != null and departSchedule.departId !=0  " >and(createUser in (select userName from `user` where departId = #{departSchedule.departId,jdbcType=INTEGER})) </if>
+        <if test="departSchedule.Name != null and departSchedule.Name != '' ">
+            and((select chineseName from `user` where userName= schedule.createUser) like concat(concat('%',#{departSchedule.Name,jdbcType=VARCHAR}),'%'))
+
+            </if>
+<!--        <if test="departSchedule.selectTime != null ">or  (date(beginTime) = date(#{departSchedule.selectTime}))</if>-->
+<!--        <if test="departSchedule.selectTime != null  ">or   (#{departSchedule.selectTime} BETWEEN beginTime AND endTime)</if>-->
+        <if test="departSchedule.selectTime != null  ">and (beginTime BETWEEN #{departSchedule.time1} and #{departSchedule.time2})</if>
+
+        <if test="departSchedule.Name != null and departSchedule.Name != '' and departSchedule.userName != null and departSchedule.userName != ''">or ((createUser =#{departSchedule.userName,jdbcType=VARCHAR})and (beginTime BETWEEN #{departSchedule.time1} and #{departSchedule.time2}))</if>
+
+        group by createUser
+
+
+   </select>
+    <select id="getChineseNameByUserName" resultType="String">
+       select chineseName from `user` where userName = #{userName}
+   </select>
+
+    <select id="getLastSchedule" resultType="Integer">
+        select scheduleId from schedule order by scheduleId desc LIMIT 1
+
+    </select>
+    <select id="getScheduleIdByCreateTime" resultType="Integer">
+        select scheduleId from schedule where createTime = #{createTimes}
+
+
+    </select>
+<!--    (createUser in (select userName from userinfo where departId = #{departSchedule.departId,jdbcType=INTEGER}))-->
+<!--    and createUser like concat('％',#{departSchedule.userName,jdbcType=VARCHAR},'％')-->
+<!--    and createUser = (select userName from userinfo where userId=#{departSchedule.userId,jdbcType=VARCHAR})-->
+<!--    and  date_format(`beginTime`,%Y) = date_format(#{departSchedule.selectTime},%Y)-->
+<!--    and  date_format(`beginTime`,%m) = date_format(#{departSchedule.selectTime},%m)-->
+<!--    and  date_format(`beginTime`,%d) = date_format(#{departSchedule.selectTime},%d)-->
+
+<!--    `createTime`=#{Schedule.createTime,jdbcType=TIMESTAMP},-->
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

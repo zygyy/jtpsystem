@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.DepartMapper">
+    <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.Depart">
+        <id column="departId" jdbcType="INTEGER" property="departId"/>
+        <result column="departName" jdbcType="VARCHAR" property="departName" />
+        <result column="principalUser" jdbcType="VARCHAR" property="principalUser" />
+        <result column="connectTelNo" jdbcType="BIGINT" property="connectTelNo" />
+        <result column="connectMobileTelNo" jdbcType="BIGINT" property="connectMobileTelNo" />
+        <result column="faxes" jdbcType="BIGINT" property="faxes" />
+        <result column="branchId" jdbcType="INTEGER" property="branchId" />
+
+    </resultMap>
+
+    <insert id="addDepart" parameterType="com.capgemini.jtp.entity.Depart">
+        INSERT INTO depart(`departName`,`principalUser`,`connectTelNo`,`connectMobileTelNo`,`faxes`,`branchId`)
+        Values (
+        #{depart.departName},
+        #{depart.principalUser},
+        #{depart.connectTelNo},
+        #{depart.connectMobileTelNo},
+        #{depart.faxes},
+        #{depart.branchId})
+    </insert>
+
+    <update id="updateDepart" parameterType="com.capgemini.jtp.entity.Depart">
+        update depart
+        <set>
+            <if test="depart.departName != null">
+                departName = #{depart.departName},
+            </if>
+            <if test="depart.principalUser != null">
+                principalUser = #{depart.principalUser},
+            </if>
+            <if test="depart.connectTelNo != null">
+                connectTelNo = #{depart.connectTelNo},
+            </if>
+            <if test="depart.connectMobileTelNo != null">
+                connectMobileTelNo = #{depart.connectMobileTelNo},
+            </if>
+            <if test="depart.faxes != null">
+                faxes = #{depart.faxes},
+            </if>
+            <if test="depart.branchId != null">
+                branchId = #{depart.branchId},
+            </if>
+        </set>
+        where departId = #{depart.departId}
+    </update>
+
+    <select id="listDepartVo" resultMap="BaseResultMap">
+        select * from depart where departId !=0
+
+    </select>
+
+    <delete id="deleteDepartByDepartId" parameterType="com.capgemini.jtp.entity.Depart">
+        DELETE FROM depart where departId=#{depart.departId}
+    </delete>
+
+    <!-- 根据departmentId获取Department -->
+    <select id="getDepartment" resultType="com.capgemini.jtp.entity.Depart">
+        SELECT * FROM depart WHERE departId = #{departmentId}
+    </select>
+
+    <select id="selectDepartIdByDepartNameAndBranchId" resultType="Integer">
+        SELECT departId FROM depart WHERE departName = #{messageUserSearchVo.departName}
+        and branchId in (select branchId from branch where branchName = #{messageUserSearchVo.branchName})
+    </select>
+
+</mapper>

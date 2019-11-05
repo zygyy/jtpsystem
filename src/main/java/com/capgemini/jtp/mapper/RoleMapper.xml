@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.RoleMapper">
+   <select id="listRole" resultType="com.capgemini.jtp.vo.response.RoleListVo">
+       select roleId,roleName,roleDesc
+       from role
+   </select>
+    <update id="updateRoleById" parameterType="com.capgemini.jtp.vo.request.RoleAddVo">
+        update role
+        <set>
+            <if test="roleAdd.roleName != null and roleAdd.roleName != ''">`roleName` = #{roleAdd.roleName,jdbcType=VARCHAR},</if>
+            <if test="roleAdd.roleDesc != null and roleAdd.roleDesc != '' ">`roleDesc`=#{roleAdd.roleDesc,jdbcType=VARCHAR},</if>
+
+        </set>
+        where roleId = #{roleAdd.roleId,jdbcType=INTEGER}
+    </update>
+    <delete id="deleteRoleById" parameterType="int">
+       DELETE FROM role WHERE roleId=#{roleId};
+
+       DELETE FROM role_right WHERE roleId=#{roleId}
+    </delete>
+    <insert id="addRoleById" parameterType="com.capgemini.jtp.vo.request.RoleAddVo">
+     insert into role (`roleName`, `roleDesc`)
+        values
+
+            (
+            #{roleAddVo.roleName,jdbcType=VARCHAR}, #{roleAddVo.roleDesc,jdbcType=VARCHAR}
+            );
+     insert into role_right(roleId,nodeId)
+     values
+     (
+     last_insert_id(),23
+    )
+    </insert>
+    <select id="listUserState" resultType="com.capgemini.jtp.vo.response.UserStateRespVo">
+        select * from user_state where userStateId >= 0
+    </select>
+    <select id="getListRole" resultType="com.capgemini.jtp.entity.Role">
+       select *
+       from role
+   </select>
+    <insert id="addPowerById" parameterType="com.capgemini.jtp.vo.request.AddVo">
+       insert  into  role_right(`roleId`,`nodeId`)
+       VALUES(
+          #{addVo.roleId,jdbcType=INTEGER},
+
+            #{addVo.nodeId,jdbcType=INTEGER}
+
+)
+
+    </insert>
+    <select id="isPowerById" resultType="int">
+       select count(*) from role_right
+      where
+      roleId=#{roleId}
+    </select>
+    <delete id="deletePowerById" parameterType="int">
+
+       DELETE FROM role_right WHERE roleId=#{roleId}
+    </delete>
+
+    <insert id="addPowerByIdOne" parameterType="int">
+
+     insert into role_right(roleId,nodeId)
+     values
+     (
+    #{roleId},23
+    )
+    </insert>
+    <select id="isPowerByNodeId" resultType="int">
+   select  count(nodeId) from role_right
+   where nodeId=#{nodeId}
+
+    </select>
+</mapper>

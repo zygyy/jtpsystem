@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.FileInfoMapper">
+    <select id="listCurrentDirDocument" resultType="com.capgemini.jtp.entity.FileInfo">
+        select * from file where `parentId` = #{fileInfo.parentId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getFileTypeName" resultType="String">
+        select `fileTypeName` from filetype where `fileTypeId` = #{fileType,jdbcType=INTEGER}
+    </select>
+
+    <select id="getAccessoryTypeName" resultType="String">
+        select `fileTypeName` from filetype where `fileTypeId` = #{accessoryType,jdbcType=INTEGER}
+    </select>
+    
+    <update id="updateFileInfoById" >
+        update file set `label` = #{fileInfo.label,jdbcType=VARCHAR},
+        `remark` = #{fileInfo.remark,jdbcType=VARCHAR}
+         where `fileId` = #{fileInfo.fileId,jdbcType=INTEGER}
+    </update>
+
+    <select id="listAccessoryInfo" resultType="com.capgemini.jtp.entity.AccessoryInfo">
+        select * from accessory_file where `fileId` = #{fileInfo.fileId}
+    </select>
+
+    <insert id="addFileInfo" parameterType="com.capgemini.jtp.entity.FileInfo">
+        insert into file (`label`, `fileType`, `remark`, `fileOwner`, `createDate`, `parentId`, `filePath`) VALUES
+        (#{fileInfo.label,jdbcType=VARCHAR}, #{fileInfo.fileType,jdbcType=INTEGER}, #{fileInfo.remark,jdbcType=VARCHAR},
+        #{fileInfo.fileOwner,jdbcType=VARCHAR},#{fileInfo.createDate},
+        #{fileInfo.parentId,jdbcType=INTEGER}, #{fileInfo.filePath,jdbcType=VARCHAR})
+    </insert>
+
+
+
+    <insert id="addAccessoryInfo" parameterType="com.capgemini.jtp.entity.AccessoryInfo">
+        insert into accessory_file (`fileId`, `accessoryName`, `accessorySize`, `accessoryType`, `createDate`, `accessoryPath`) values
+        (#{accessoryInfo.fileId,jdbcType=INTEGER}, #{accessoryInfo.accessoryName,jdbcType=VARCHAR},
+        #{accessoryInfo.accessorySize,jdbcType=INTEGER}, #{accessoryInfo.accessoryType,jdbcType=INTEGER},
+         #{accessoryInfo.createDate}, #{accessoryInfo.accessoryPath,jdbcType=VARCHAR} )
+    </insert>
+
+    <select id="getLastInsertId" resultType="INTEGER">
+        select last_insert_id()
+    </select>
+
+    <delete id="deleteFile" parameterType="com.capgemini.jtp.entity.FileInfo">
+        delete from file where `fileId` = #{fileInfo.fileId,jdbcType=INTEGER}
+    </delete>
+
+    <delete id="deleteAccessory" parameterType="com.capgemini.jtp.entity.AccessoryInfo">
+        delete from accessory_file where `accessoryId` = #{accessoryInfo.accessoryId,jdbcType=INTEGER}
+    </delete>
+
+    <update id="MoveFileToRecycleBin" parameterType="com.capgemini.jtp.entity.FileInfo">
+        update file set `ifDelete` = '1',
+        `deleteDate` = #{fileInfo.deleteDate,jdbcType=TIMESTAMP}
+        where `fileId` = #{fileInfo.fileId,jdbcType=INTEGER}
+    </update>
+
+    <select id="listRecycleBin" resultType="com.capgemini.jtp.entity.FileInfo">
+        select * from file where `ifDelete` = '1'
+    </select>
+
+    <update id="fileReduction" parameterType="com.capgemini.jtp.entity.FileInfo">
+        update file set `ifDelete` = '0' where `fileId` = #{fileInfo.fileId}
+    </update>
+
+<!--    <select id="fileSearch" resultType="com.capgemini.jtp.entity.FileInfo">-->
+<!--        select * from file where `ifDelete` = '0'-->
+<!--        <if test="fileSearch.fileName != null">-->
+<!--            and `fileName` = #{fileSearch.fileName,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test="fileSearch.fileOwner != null">-->
+<!--            and `fileOwner` = #{fileSearch.fileOwner,jdbcType=VARCHAR}-->
+<!--        </if>-->
+<!--        <if test="fileSearch.startDate != null and fileSearch.endDate != null">-->
+<!--            and `createDate` between #{fileSearch.startDate} and #{fileSearch.endDate}-->
+<!--        </if>-->
+<!--    </select>-->
+
+    <select id="fileSearch" resultType="com.capgemini.jtp.entity.FileInfo">
+        select * from file where `ifDelete` = '0'
+        <if test="fileSearch.label != null">
+            and `label` like concat(concat('%',#{fileSearch.label,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="fileSearch.fileOwner != null">
+            and `fileOwner` like concat(concat('%',#{fileSearch.fileOwner,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="fileSearch.startDate != null and fileSearch.endDate != null">
+            and `createDate` between #{fileSearch.startDate,jdbcType=TIMESTAMP} and #{fileSearch.endDate,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+
+
+
+
+
+    <select id="getFileDetail" resultType="com.capgemini.jtp.entity.FileInfo">
+        select * from file where `fileId` = #{fileInfo.fileId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getAccessorySize" resultType="String">
+        select `accessorySize` from accessory_file where `fileId` = #{accessoryInfo.fileId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getFileTypeByFileId" resultType="INTEGER">
+        select `fileType` from file where `fileId` = #{fileId,jdbcType=INTEGER}
+    </select>
+
+
+    <!-- 获取所有Menu -->
+        <select id="getAllMenus" resultType="com.capgemini.jtp.entity.FileInfo">
+        SELECT * FROM file where ifDelete = '0'
+      </select>
+
+    <!-- 获取所有父级Menu -->
+
+    <select id="getTree" resultType="com.capgemini.jtp.entity.FileInfo">
+        SELECT *  from file where ifDelete = '0'
+        and parentId='0'
+  </select>
+    <select id="getFilePathByFileId" resultType="String">
+        select `filePath` from file where `fileId` = #{fileId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getAccessoryPathByAccessoryId" resultType="String">
+        select `accessoryPath` from accessory_file where `accessoryId` = #{accessoryId,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectMaxId" resultType="Integer">
+        select max(fileId) from file
+    </select>
+
+    <delete id="deleteFileByPath" parameterType="STRING">
+        delete from file where `filePath` = #{filePath,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="getFileIdByPath" resultType="Integer">
+        select fileId from file where filePath = #{filePath,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getFileIdByLabel" resultType="Integer">
+        select fileId from file where label = #{label,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getAccessoryIdByAccessoryName" resultType="Integer">
+        select accessoryId from accessory_file where accessoryName = #{accessoryName,jdbcType=VARCHAR}
+    </select>
+
+
+</mapper>

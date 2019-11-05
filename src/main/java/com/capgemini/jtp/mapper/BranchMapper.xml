@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.BranchMapper">
+
+    <insert id="addBranch" parameterType="com.capgemini.jtp.entity.Branch">
+        INSERT INTO branch(`branchName`,`branchShortName`)
+        Values (
+        #{branch.branchName,jdbcType=VARCHAR},
+        #{branch.branchShortName,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateBranch" parameterType="com.capgemini.jtp.entity.Branch">
+        update branch
+        <set>
+            <if test="branch.branchName != null">
+                branchName = #{branch.branchName,jdbcType=VARCHAR},
+            </if>
+            <if test="branch.branchShortName != null">
+                branchShortName = #{branch.branchShortName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where branchId = #{branch.branchId,jdbcType=BIGINT}
+    </update>
+
+    <select id="listBranchVo" resultType="com.capgemini.jtp.entity.Branch">
+        select branchId,branchName,branchShortName from branch
+    </select>
+    <select id="getBranchNameById" resultType="String">
+        select branchName from branch where branchId=#{branchId}
+    </select>
+
+
+    <delete id="deleteBranchByBranchId" parameterType="com.capgemini.jtp.entity.Branch">
+        DELETE FROM branch where branchId=#{branch.branchId}
+    </delete>
+
+
+    <select id="selectBranchIdByBranchName" resultType="integer">
+        select branchId from branch where branchName = #{branchName}
+    </select>
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.MessageTransMapper">
+  
+  <!-- 插入信息发送记录 -->
+  <insert id="insertMessageTranses" parameterType="java.util.List">
+    INSERT INTO message_to_user (id, messageId, toUserId)
+    VALUES
+      <foreach collection="messageTranses" item="messageTrans" separator=",">
+        (#{messageTrans.id}, #{messageTrans.messageId}, #{messageTrans.toUserId})
+      </foreach>
+  </insert>
+
+  
+  <!-- 根据messageId获取消息接收对象 -->
+  <select id="getRecipientsByMessageId" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.User">
+    SELECT * FROM user WHERE userId IN (
+        SELECT toUserId FROM message_to_user WHERE messageId = #{messageId}
+      )
+  </select>
+
+  <!-- 根据userId获取所有相关的消息 -->
+  <select id="getMessagesByUserId" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE fromUserId = #{userId}
+    and isDeleted = '0'
+    or messageId IN (
+        SELECT m.messageId FROM message_to_user mt,message m WHERE mt.toUserId = #{userId}
+        and m.messageId = mt.messageId
+        and m.isDeleted = '0'
+      )
+  </select>
+  
+  <!-- 根据recipientId获取消息列表 -->
+  <select id="getMessagesByRecipientId" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE messageId IN (
+        SELECT messageId FROM message_to_user WHERE toUserId = #{recipientId}
+      )
+      and isDeleted = '0'
+  </select>
+
+  <!-- 根据recipientId获取未读消息列表（未删除） -->
+  <select id="getMessagesByRecipientIdAndNotReadNotDeleted" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE messageId IN (
+        SELECT messageId FROM message_to_user WHERE toUserId = #{recipientId}
+        and ifRead = '0'
+      )
+      and isDeleted = '0'
+  </select>
+
+  <!-- 根据recipientId获取未读消息列表（已删除） -->
+  <select id="getMessagesByRecipientIdAndNotReadDeleted" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE messageId IN (
+        SELECT messageId FROM message_to_user WHERE toUserId = #{recipientId}
+        and ifRead = '0'
+      )
+      and isDeleted = '1'
+  </select>
+
+
+  <!-- 根据fromUserId获取消息列表 -->
+  <select id="getMessagesByFromUserId" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE fromUserId = #{fromUserId}
+    and ifPublish = '1'
+    and isDeleted = '0'
+  </select>
+
+  <!-- 根据fromUserId获取未发送消息列表 -->
+  <select id="getMessagesByFromUserIdAndNotPublish" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE fromUserId = #{fromUserId}
+    and ifPublish = '0'
+    and isDeleted = '0'
+  </select>
+
+
+  <!-- 根据fromUserId获取已删除消息列表 -->
+  <select id="getDeletedMessages" parameterType="Integer"
+          resultType="com.capgemini.jtp.entity.Message">
+    SELECT * FROM message WHERE fromUserId = #{fromUserId}
+    and isDeleted = '1'
+    or messageId IN (
+        SELECT m.messageId FROM message_to_user mt,message m WHERE mt.toUserId = #{fromUserId}
+        and m.messageId = mt.messageId
+        and m.isDeleted = '1'
+      )
+
+  </select>
+  
+  <!-- 标记信息为已读状态 -->
+  <update id="readMessages">
+    UPDATE message_to_user SET ifRead = '1'
+    WHERE toUserId = #{messageReadVo.currentUserId} AND messageId IN
+      <foreach collection="messageReadVo.messageIds" item="messageId" separator="," open="(" close=")">
+        #{messageId}
+      </foreach>
+  </update>
+  
+  <!-- 删除收件箱里的消息 -->
+  <delete id="deleteMessageTranses" parameterType="java.util.List">
+    DELETE FROM message_to_user WHERE id IN
+      <foreach collection="messageTransIds" item="messageTransId" separator="," open="(" close=")">
+        #{messageTransId}
+      </foreach>
+  </delete>
+  
+  <!-- 如果信息被删除, 那么将用户收件箱里的信息也删除掉 -->
+  <delete id="deleteMessageTransesByMessageId" parameterType="java.util.List">
+    DELETE FROM message_to_user WHERE messageId IN
+      <foreach collection="messageIds" item="messageId" separator="," open="(" close=")">
+        #{messageId}
+      </foreach>
+  </delete>
+
+  <!-- 逻辑删除，删除消息到回收站 -->
+  <delete id="deleteMessagesToCollection" parameterType="java.util.List">
+    update message set isDeleted = '1'
+    WHERE messageId IN
+    <foreach collection="messageIds" item="messageId" separator="," open="(" close=")">
+      #{messageId}
+    </foreach>
+  </delete>
+
+  <!-- 根据userId和messageId判断消息是否已读 -->
+  <select id="ifReanByUserIdAndMessageId" parameterType="com.capgemini.jtp.vo.request.MessageIfRead"
+          resultType="string">
+    SELECT ifRead FROM message_to_user
+    WHERE messageId = #{messageIfRead.messageId}
+    AND toUserId = #{messageIfRead.userId}
+  </select>
+  
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.User">
+        <id column="userId" property="userId"/>
+        <result column="departId" property="departId"/>
+        <result column="chineseName" property="chineseName"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="roleId" property="roleId"/>
+    </resultMap>
+
+    <resultMap id="lazyLoadRoles" type="com.capgemini.jtp.entity.User" extends="BaseResultMap">
+        <collection property="roles" ofType="com.capgemini.jtp.entity.Role"
+                    select="com.capgemini.jtp.mapper.UserMapper.getRolesByUserId"
+                    column="userId"></collection>
+    </resultMap>
+
+<!--    <resultMap id="eagerLoadRoles" type="com.capgemini.jtp.entity.User" extends="BaseResultMap">-->
+<!--        <collection property="roles" ofType="com.capgemini.jtp.entity.Role">-->
+<!--            <id property="id" column="rid"/>-->
+<!--            <result property="name" column="rname"/>-->
+<!--            <result property="nameZh" column="rnameZh"/>-->
+<!--        </collection>-->
+<!--    </resultMap>-->
+
+    <select id="loadUserByUsername" resultMap="lazyLoadRoles">
+        select * from user WHERE username=#{username};
+    </select>
+
+<!--    <select id="loadUserByEmpId" resultMap="lazyLoadRoles">-->
+<!--        select * from users WHERE empId=#{empId};-->
+<!--    </select>-->
+
+    <!-- 此方法待定 -->
+    <select id="getRolesByUserId" resultType="com.capgemini.jtp.entity.Role">
+        SELECT r.* FROM user u,role r where u.roleId=r.roleId AND u.userId=#{id}
+    </select>
+
+<!--    <insert id="userReg" parameterType="com.capgemini.jtp.vo.employee.request.UserEditVo">-->
+<!--        INSERT INTO users set username=#{userEdit.username,jdbcType=VARCHAR},-->
+<!--                           password=#{userEdit.password,jdbcType=VARCHAR},-->
+<!--                           empId=#{userEdit.empId,jdbcType=BIGINT},-->
+<!--                           name=#{userEdit.name,jdbcType=VARCHAR}-->
+<!--    </insert>-->
+
+
+<!--&lt;!&ndash;    此方法待定&ndash;&gt;-->
+<!--    <select id="getUsersByKeywords" resultMap="eagerLoadRoles">-->
+<!--        select h.*,`r`.`id` AS `rid`,`r`.`name` AS `rname`,`r`.`nameZh` AS `rnameZh` from ((`user` `h` left join `user_role`-->
+<!--        `h_r` on ((`h`.`id` = `h_r`.`userid`))) left join `role` `r` on ((`h_r`.`rid` = `r`.`id`))) where h.`id` not-->
+<!--        in(select h_r.`userid` from user_role h_r,role r where h_r.`rid`=r.`id` and r.`nameZh`='系统管理员')-->
+<!--        <if test="keywords!='all' and keywords!=''">-->
+<!--            and h.`name` like concat('%',#{keywords},'%')-->
+<!--        </if>-->
+<!--        order by h.`id` limit 10-->
+<!--    </select>-->
+
+<!--&lt;!&ndash;    待定&ndash;&gt;-->
+<!--    <select id="getUserById" resultMap="eagerLoadRoles">-->
+<!--        select h.*,`r`.`id` AS `rid`,`r`.`name` AS `rname`,`r`.`nameZh` AS `rnameZh` from ((`user` `h` left join `user_role`-->
+<!--        `h_r` on ((`h`.`id` = `h_r`.`userid`))) left join `role` `r` on ((`h_r`.`rid` = `r`.`id`))) where h.`id`=#{userId}-->
+<!--    </select>-->
+
+    <update id="updateUser" parameterType="com.capgemini.jtp.entity.User">
+        update user
+        <set>
+
+            <if test="user.username != null">
+                username = #{user.username},
+            </if>
+            <if test="user.password != null and user.password !='' ">
+                password = #{user.password},
+            </if>
+            <if test="user.chineseName != null">
+                chineseName = #{user.chineseName},
+            </if>
+            <if test="user.departId != 0 and user.departId != null">
+                departId = #{user.departId},
+            </if>
+            <if test="user.gender != null and user.password !='' ">
+                gender = #{user.gender},
+            </if>
+            <if test="user.roleId != 0 and user.roleId != null">
+                roleId = #{user.roleId},
+            </if>
+            <if test="user.userStateId != 0 and user.userStateId != null">
+                userState = #{user.userStateId},
+            </if>
+        </set>
+        where userId = #{user.userId,jdbcType=INTEGER}
+    </update>
+    <select id="listUserVo" resultMap="BaseResultMap">
+        select * from `user` where userId !=0
+
+    </select>
+    <insert id="addUser">
+        insert into `user` (`chineseName`, `username`,`password`,`gender`,departId,roleId,userState)
+        values
+
+            (
+            #{user.chineseName},#{user.username},#{user.password,jdbcType=VARCHAR},#{user.gender},#{user.departId},#{user.roleId},#{user.userStateId}
+            )
+
+    </insert>
+    <delete id="deleteUserByUserId" parameterType="com.capgemini.jtp.entity.User">
+        DELETE FROM `user` WHERE userId=#{user.userId}
+    </delete>
+    <select id="getMassageById" resultType="com.capgemini.jtp.vo.response.UserMassageRespVo">
+       select  * from
+       (select a.userId,a.username,a.chineseName,a.password,a.departId,b.departName,a.gender,a.roleId,c.roleName,a.userState,d.userStateName
+       from `user` a,depart b,role c,user_state d
+       where (a.departId=b.departId and a.roleId=c.roleId and a.userState=d.userStateId))as tabel1
+       where userId=#{userId}
+   </select>
+    <select id="getMassage" resultType="com.capgemini.jtp.vo.response.UserMassageRespVo">
+       select  * from
+       (select a.userId,a.username,a.chineseName,a.password,a.departId,b.departName,a.gender,a.roleId,c.roleName,a.userState,d.userStateName
+       from `user` a,depart b,role c,user_state d
+       where (a.departId=b.departId and a.roleId=c.roleId and a.userState=d.userStateId))as tabel1
+       where userId !=0
+   </select>
+
+    <!-- 根据userId查询User -->
+    <select id="getUser" resultType="com.capgemini.jtp.entity.User">
+        SELECT * FROM user WHERE userId = #{userId};
+    </select>
+
+
+    <select id="selectUserListByMessageUser" parameterType="com.capgemini.jtp.vo.request.MessageUserSearchVo"
+            resultType="com.capgemini.jtp.entity.User">
+        select distinct u.* from user u, branch b, depart d
+        where u.userState = 1
+        <if test="messageUserSearchVo.branchName != null and messageUserSearchVo.branchName !='' ">
+            and b.branchName = #{messageUserSearchVo.branchName,jdbcType=VARCHAR}
+            and b.branchId = d.branchId
+        </if>
+        <if test="messageUserSearchVo.departName != null and messageUserSearchVo.departName !='' ">
+            and d.departName = #{messageUserSearchVo.departName,jdbcType=VARCHAR}
+            and u.departId = d.departId
+        </if>
+        <if test="messageUserSearchVo.chineseName != null and messageUserSearchVo.chineseName !='' ">
+            and u.chineseName like concat(concat('%',#{messageUserSearchVo.chineseName,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="messageUserSearchVo.userId != null and messageUserSearchVo.userId !=0 ">
+            and u.userId = #{messageUserSearchVo.userId,jdbcType=INTEGER}
+        </if>
+        order by u.userId
+    </select>
+
+    <select id="getAllUserIds" resultType="Integer">
+        SELECT userId FROM user;
+    </select>
+
+</mapper>

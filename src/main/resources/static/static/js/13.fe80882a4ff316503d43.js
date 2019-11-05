@@ -1,0 +1,2 @@
+webpackJsonp([13],{XVme:function(e,n,r){var o={"./RecycleBinIndex.vue":"W67j"};function t(e){return r(u(e))}function u(e){var n=o[e];if(!(n+1))throw new Error("Cannot find module '"+e+"'.");return n}t.keys=function(){return Object.keys(o)},t.resolve=u,e.exports=t,t.id="XVme"}});
+//# sourceMappingURL=13.fe80882a4ff316503d43.js.map

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.MessageTypeMapper">
+  
+  <!-- 列出所有信息类型 -->
+  <select id="listMessageTypes" resultType="com.capgemini.jtp.entity.MessageType">
+    SELECT * FROM message_type
+  </select>
+  
+  <!-- 获取一个信息类型 -->
+  <select id="getMessageType" parameterType="Integer" resultType="com.capgemini.jtp.entity.MessageType">
+    SELECT * FROM message_type WHERE messageTypeId = #{messageTypeId}
+  </select>
+  
+  <!-- 新增一个信息类型 -->
+  <insert id="insertMessageType" parameterType="com.capgemini.jtp.vo.request.MessageTypeEditVo">
+    INSERT INTO message_type (messageTypeId, messageTypeName, messageDesc)
+    VALUES
+        (
+          #{messageTypeEditVo.messageTypeId},
+          #{messageTypeEditVo.messageTypeName},
+          #{messageTypeEditVo.messageTypeDesc}
+        )
+  </insert>
+  
+  <!-- 修改一个信息类型 -->
+  <update id="updateMessageType" parameterType="com.capgemini.jtp.vo.request.MessageTypeEditVo">
+    UPDATE message_type
+    SET messageTypeName = #{messageTypeEditVo.messageTypeName},
+        messageDesc = #{messageTypeEditVo.messageTypeDesc}
+    WHERE messageTypeId = #{messageTypeEditVo.messageTypeId}
+  </update>
+  
+  <!-- 删除信息类型 -->
+  <delete id="deleteMessageTypes" parameterType="java.util.List">
+    DELETE FROM message_type WHERE messageTypeId IN
+      <foreach collection="messageTypeIds" item="messageTypeId" separator="," open="(" close=")">
+        #{messageTypeId}
+      </foreach>
+  </delete>
+  
+</mapper>

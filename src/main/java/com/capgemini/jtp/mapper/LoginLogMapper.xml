@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.LoginLogMapper">
+  <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.LoginLog">
+    <id column="loginId" jdbcType="INTEGER" property="loginId" />
+    <result column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="loginTime" jdbcType="TIMESTAMP" property="loginTime" />
+    <result column="ifSuccess" jdbcType="INTEGER" property="ifSuccess" />
+    <result column="loginUserIp" jdbcType="VARCHAR" property="loginUserIp" />
+    <result column="loginDesc" jdbcType="VARCHAR" property="loginDesc" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    loginId, userId, loginTime, ifSuccess, loginUserIp, loginDesc, chineseName
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from login_log
+    where loginId = #{loginId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from login_log
+    where loginId = #{loginId,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.capgemini.jtp.entity.LoginLog">
+    insert into login_log (loginId, userId, loginTime,
+      ifSuccess, loginUserIp, loginDesc, chineseName
+      )
+    values (#{loginId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{loginTime,jdbcType=TIMESTAMP},
+      #{ifSuccess,jdbcType=INTEGER}, #{loginUserIp,jdbcType=VARCHAR}, #{loginDesc,jdbcType=VARCHAR}, #{chineseName,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.capgemini.jtp.entity.LoginLog">
+    insert into login_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="loginId != null">
+        loginId,
+      </if>
+      <if test="userId != null">
+        userId,
+      </if>
+      <if test="loginTime != null">
+        loginTime,
+      </if>
+      <if test="ifSuccess != null">
+        ifSuccess,
+      </if>
+      <if test="loginUserIp != null">
+        loginUserIp,
+      </if>
+      <if test="loginDesc != null">
+        loginDesc,
+      </if>
+      <if test="chineseName != null">
+        chineseName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="loginId != null">
+        #{loginId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="loginTime != null">
+        #{loginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ifSuccess != null">
+        #{ifSuccess,jdbcType=INTEGER},
+      </if>
+      <if test="loginUserIp != null">
+        #{loginUserIp,jdbcType=VARCHAR},
+      </if>
+      <if test="loginDesc != null">
+        #{loginDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="chineseName != null">
+        #{chineseName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.capgemini.jtp.entity.LoginLog">
+    update login_log
+    <set>
+      <if test="userId != null">
+        userId = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="loginTime != null">
+        loginTime = #{logintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ifSuccess != null">
+        ifSuccess = #{ifsuccess,jdbcType=INTEGER},
+      </if>
+      <if test="loginUserIp != null">
+        loginUserIp = #{loginuserip,jdbcType=VARCHAR},
+      </if>
+      <if test="loginDesc != null">
+        loginDesc = #{logindesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where loginId = #{loginid,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.capgemini.jtp.entity.LoginLog">
+    update login_log
+    set userId = #{userId,jdbcType=INTEGER},
+      loginTime = #{loginTime,jdbcType=TIMESTAMP},
+      ifSuccess = #{ifSuccess,jdbcType=INTEGER},
+      loginUserIp = #{loginUserIp,jdbcType=VARCHAR},
+      loginDesc = #{loginDesc,jdbcType=VARCHAR}
+    where loginId = #{loginId,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectLoginLog" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from login_log
+    where loginTime between #{param1,jdbcType=TIMESTAMP} and #{param2,jdbcType=TIMESTAMP}
+  </select>
+</mapper>

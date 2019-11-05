@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.OperatelogMapper">
+  <resultMap id="BaseResultMap" type="com.capgemini.jtp.entity.OperateLog">
+    <id column="operateId" jdbcType="INTEGER" property="operateId" />
+    <result column="userId" jdbcType="INTEGER" property="userId" />
+    <result column="operateName" jdbcType="VARCHAR" property="operateName" />
+    <result column="objectId" jdbcType="VARCHAR" property="objectId" />
+    <result column="operateDesc" jdbcType="VARCHAR" property="operateDesc" />
+    <result column="operateTime" jdbcType="TIMESTAMP" property="operateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    operateId, userId, operateName, objectId, operateDesc, operateTime
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from operate_log
+    where operateId = #{operateid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from operate_log
+    where operateId = #{operateid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.capgemini.jtp.entity.OperateLog">
+    insert into operate_log (operateId, userId, operateName,
+      objectId, operateDesc, operateTime
+      )
+    values (#{operateId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{operateName,jdbcType=VARCHAR},
+      #{objectId,jdbcType=VARCHAR}, #{operateDesc,jdbcType=VARCHAR}, #{operateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.capgemini.jtp.entity.OperateLog">
+    insert into operate_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="operateId != null">
+        operateId,
+      </if>
+      <if test="userId != null">
+        userId,
+      </if>
+      <if test="operateName != null">
+        operateName,
+      </if>
+      <if test="objectId != null">
+        objectId,
+      </if>
+      <if test="operateDesc != null">
+        operateDesc,
+      </if>
+      <if test="operateTime != null">
+        operateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="operateId != null">
+        #{operateId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="operateName != null">
+        #{operateName,jdbcType=VARCHAR},
+      </if>
+      <if test="objectId != null">
+        #{objectId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateDesc != null">
+        #{operateDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null">
+        #{operateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.capgemini.jtp.entity.OperateLog">
+    update operate_log
+    <set>
+      <if test="userId != null">
+        userId = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="operateName != null">
+        operateName = #{operateName,jdbcType=VARCHAR},
+      </if>
+      <if test="objectId != null">
+        objectId = #{objectId,jdbcType=VARCHAR},
+      </if>
+      <if test="operateDesc != null">
+        operateDesc = #{operateDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="operateTime != null">
+        operateTime = #{operateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where operateId = #{operateId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.capgemini.jtp.entity.OperateLog">
+    update operate_log
+    set userId = #{userId,jdbcType=INTEGER},
+      operateName = #{operateName,jdbcType=VARCHAR},
+      objectId = #{objectId,jdbcType=VARCHAR},
+      operateDesc = #{operateDesc,jdbcType=VARCHAR},
+      operateTime = #{operateTime,jdbcType=TIMESTAMP}
+    where operateId = #{operateId,jdbcType=INTEGER}
+  </update>
+    <select id="selectAllOperateLog" resultMap="BaseResultMap">
+      select * from operate_log
+      where operateTime between #{operateLogReq.start,jdbcType=TIMESTAMP} and #{operateLogReq.end,jdbcType=TIMESTAMP}
+    </select>
+</mapper>

@@ -1,0 +1,2 @@
+webpackJsonp([11],{"+CAN":function(e,n,r){var t={"./NewsEdit.vue":"fj9f","./NewsIndex.vue":"VCJ9"};function o(e){return r(u(e))}function u(e){var n=t[e];if(!(n+1))throw new Error("Cannot find module '"+e+"'.");return n}o.keys=function(){return Object.keys(t)},o.resolve=u,e.exports=o,o.id="+CAN"}});
+//# sourceMappingURL=11.4a50cfd6e53a197f47bb.js.map

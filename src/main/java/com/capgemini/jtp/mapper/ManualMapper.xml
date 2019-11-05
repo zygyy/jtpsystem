@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.jtp.mapper.ManualMapper">
+    <insert id="insertManualSign" parameterType="com.capgemini.jtp.entity.ManualSign">
+    insert into manual_sign (userId,signTime,signDesc, signTag)
+    values (#{manualSign.userId,jdbcType=INTEGER}, #{manualSign.signTime},
+      #{manualSign.signDesc,jdbcType=VARCHAR}, 1);
+  </insert>
+    <insert id="insertManualSignOff" parameterType="com.capgemini.jtp.entity.ManualSign">
+    insert into manual_sign (userId,signTime,
+      signDesc, signTag)
+    values (#{manualSign.userId,jdbcType=INTEGER}, #{manualSign.signTime,jdbcType=TIMESTAMP},
+      #{manualSign.signDesc,jdbcType=VARCHAR}, 2);
+  </insert>
+    <select id="searchManual" resultType="com.capgemini.jtp.vo.request.ManualSignInSearchVo">
+       select u.userId,u.username,d.departName,b.branchName
+        from user u,depart d,branch b
+        where u.userId=#{userId,jdbcType=INTEGER}  and u.departId=d.departId and d.branchId=b.branchId
+    </select>
+
+    <select id="SearchManualHistory" resultType="com.capgemini.jtp.vo.response.ManualVo">
+      select u.username,m.signTime,m.signTag,m.signDesc,d.departName,b.branchName
+      from user u,manual_sign m,depart d,branch b
+      where u.userId=m.userId and u.departId=d.departId and d.branchId=b.branchId
+
+            and m.signTime BETWEEN #{manualSearchVo.startTime}
+            and #{manualSearchVo.stopTime}
+
+        <if test="manualSearchVo.userId != null and manualSearchVo.userId != ''">
+            and u.userId=#{manualSearchVo.userId,jdbcType=INTEGER}
+        </if>
+        <if test="manualSearchVo.userName != null and manualSearchVo.userName != ''">
+            and u.username like concat(concat('%',#{manualSearchVo.username,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="manualSearchVo.departName != null and manualSearchVo.departName != ''">
+            and d.departName=#{manualSearchVo.departName,jdbcType=VARCHAR}
+        </if>
+        <if test="manualSearchVo.branchName != null and manualSearchVo.branchName != ''">
+            and b.branchName=#{manualSearchVo.branchName,jdbcType=VARCHAR}
+        </if>
+
+        order by u.username
+    </select>
+
+
+
+    <select id="listBranch" resultType="com.capgemini.jtp.vo.response.BranchVo">
+        select branchName
+        from branch
+    </select>
+
+    <select id="listDepart" resultType="com.capgemini.jtp.vo.response.DepartVo">
+        select departName
+        from depart
+        where branchId=(select branchId from branch
+        where branchName=#{branchName,jdbcType=VARCHAR})
+    </select>
+
+
+    <select id="listCountSign" resultType="com.capgemini.jtp.vo.response.CountSignVo">
+        select username,departName,branchName
+        from user u,manual_sign m,depart d,branch b
+        where u.userId=m.userId and u.departId=d.departId and d.branchId=b.branchId
+        <if test="CountSignSearchVo.startTime != null and CountSignSearchVo.stopTime != null">
+            and m.signTime BETWEEN #{CountSignSearchVo.startTime,jdbcType=TIMESTAMP} and #{CountSignSearchVo.stopTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="CountSignSearchVo.departName != null and CountSignSearchVo.departName != ''">
+            and d.departName=#{CountSignSearchVo.departName,jdbcType=VARCHAR}
+        </if>
+        <if test="CountSignSearchVo.branchName != null and CountSignSearchVo.branchName != ''">
+            and b.branchName=#{CountSignSearchVo.branchName,jdbcType=VARCHAR}
+        </if>
+        order by u.username
+    </select>
+
+    <select id="countLate" resultType="Integer">
+        select count(signTime)
+        from user u,manual_sign m,depart d,branch b,work_time w
+        where u.userId=m.userId and u.departId=d.departId and d.branchId=b.branchId
+        <if test="CountSignSearchVo.startTime != null and CountSignSearchVo.stopTime != null">
+            and m.signTime BETWEEN #{CountSignSearchVo.startTime,jdbcType=TIMESTAMP} and #{CountSignSearchVo.stopTime,jdbcType=TIMESTAMP}
+           and m.signTag=1  and m.signTime  >  w.onDutyTime
+        </if>
+        <if test="CountSignSearchVo.departName != null and CountSignSearchVo.departName != ''">
+            and d.departName=#{CountSignSearchVo.departName,jdbcType=VARCHAR}
+        </if>
+        <if test="CountSignSearchVo.branchName != null and CountSignSearchVo.branchName != ''">
+            and b.branchName=#{CountSignSearchVo.branchName,jdbcType=VARCHAR}
+        </if>
+        <if test="CountSignSearchVo.userName != null and CountSignSearchVo.userName != ''">
+            and u.username=#{CountSignSearchVo.userName,jdbcType=VARCHAR}
+        </if>
+        order by u.username
+    </select>
+
+    <select id="countLeaveEarly" resultType="Integer">
+        select count(signTime)
+        from user u,manual_sign m,depart d,branch b,work_time w
+        where u.userId=m.userId and u.departId=d.departId and d.branchId=b.branchId
+        <if test="CountSignSearchVo.startTime != null and CountSignSearchVo.stopTime != null">
+            and m.signTime BETWEEN #{CountSignSearchVo.startTime,jdbcType=TIMESTAMP} and #{CountSignSearchVo.stopTime,jdbcType=TIMESTAMP}
+            and m.signTag=2 and  m.signTime  &lt; w.offDutyTime
+        </if>
+        <if test="CountSignSearchVo.departName != null and CountSignSearchVo.departName != ''">
+            and d.departName=#{CountSignSearchVo.departName,jdbcType=VARCHAR}
+        </if>
+        <if test="CountSignSearchVo.branchName != null and CountSignSearchVo.branchName != ''">
+            and b.branchName=#{CountSignSearchVo.branchName,jdbcType=VARCHAR}
+        </if>
+        <if test="CountSignSearchVo.userName != null and CountSignSearchVo.userName != ''">
+            and u.username=#{CountSignSearchVo.userName,jdbcType=VARCHAR}
+        </if>
+        order by u.username
+    </select>
+
+    <select id="listYearTime" resultType="Integer">
+
+
+
+        select count(signTime)
+        from user u,manual_sign m,depart d,branch b
+        where u.userId=m.userId
+        and u.departId=d.departId
+        and d.branchId=b.branchId
+        and m.signTag=1
+        and m.signTime
+        BETWEEN #{CountSignSearchVo.startTime,jdbcType=TIMESTAMP}
+        and #{CountSignSearchVo.stopTime,jdbcType=TIMESTAMP}
+
+        and u.username=#{CountSignSearchVo.userName,jdbcType=VARCHAR}
+        <if test="CountSignSearchVo.branchName != null and CountSignSearchVo.branchName != ''">
+            and b.branchName=#{CountSignSearchVo.branchName,jdbcType=VARCHAR}
+        </if>
+        <if test="CountSignSearchVo.userName != null and CountSignSearchVo.userName != ''">
+            and u.username=#{CountSignSearchVo.userName,jdbcType=VARCHAR}
+        </if>
+        order by u.username
+    </select>
+
+    <select id="isSign" resultType="Integer">
+        select count(*)
+        from manual_sign
+        where userId=#{ManualSignInVo.userId,jdbcType=INTEGER}
+     and signTime BETWEEN #{ManualSignInVo.start,jdbcType=TIMESTAMP} and #{ManualSignInVo.end,jdbcType=TIMESTAMP}
+
+
+    </select>
+</mapper>
